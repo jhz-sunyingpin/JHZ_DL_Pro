@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/bCameraShow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY" />
+
+    <com.efrobot.capturing.MySurfaceView
+        android:id="@+id/bMyDraw"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/bLinControl"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="43dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/begin_b_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="开始"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/stop_b_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="停止"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/switch_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="切换镜头"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/b_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="双目-左摄像头"
+            android:textColor="@android:color/holo_red_light"
+            android:textSize="28sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bActControl"
+        android:layout_width="308dp"
+        android:layout_height="260dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="100dp"
+        android:layout_marginTop="140dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/right_turn_btn"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="100dp"
+            android:text="右转"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/forward_btn"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:text="前进"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/backward_btn"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="200dp"
+            android:layout_marginLeft="-100dp"
+            android:text="后退"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/left_turn_btn"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="100dp"
+            android:text="左转"
+            android:textSize="18sp"/>
+
+    </LinearLayout>
+
+</FrameLayout>

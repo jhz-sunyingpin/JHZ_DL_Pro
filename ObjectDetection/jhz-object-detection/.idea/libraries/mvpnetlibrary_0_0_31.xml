@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="mvpnetlibrary-0.0.31">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/d6d5c26ff0eae1a555e6bf161a075c12feb20400/output/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/d6d5c26ff0eae1a555e6bf161a075c12feb20400/output/jars/libs/okhttp-2.5.0.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/d6d5c26ff0eae1a555e6bf161a075c12feb20400/output/jars/libs/okio-1.6.0.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/d6d5c26ff0eae1a555e6bf161a075c12feb20400/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.efrobot.library.net/mvpnetlibrary/0.0.31/98ab9cd1c09fbdd15049432f528a2a538c5fb398/mvpnetlibrary-0.0.31-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

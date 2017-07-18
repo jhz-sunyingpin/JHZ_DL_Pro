@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="framework-1.0.33">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/06cefcea88b1e500209a04d90a68081f4fd383fa/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/06cefcea88b1e500209a04d90a68081f4fd383fa/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.efrobot.library/framework/1.0.33/468907ec8971362f250dacd397e5557bda37285f/framework-1.0.33-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

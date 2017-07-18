@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="coreprogress-0.0.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/0ec58baf5ed14f5c4c31aaaa93a1a0fd0f4361a8/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/0ec58baf5ed14f5c4c31aaaa93a1a0fd0f4361a8/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cn.edu.zafu/coreprogress/0.0.3/f1a5e6090a9010b9fd951f716db5bdc7468e5c3f/coreprogress-0.0.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,100 @@
+import java.text.SimpleDateFormat
+
+apply plugin: 'com.android.application'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        maven{ url 'http://101.201.73.113:8081/nexus/content/repositories/Jhz-Client-Releases/'}
+    }
+    repositories {
+        jcenter()
+    }
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+
+
+    signingConfigs {
+        platformKey {
+            keyPassword 'jinhuazhe12345678'
+            storeFile file(getProjectDir().getParent() + '/key_store/platform.keystore')
+            storePassword 'jinhuazhe12345678'
+            keyAlias 'jhz'
+        }
+
+        userKey {
+            keyPassword 'jinhuazhe12345678'
+            storeFile file(getProjectDir().getParent() + '/key_store/efrobotKeyStore_release.jks')
+            storePassword 'jinhuazhe12345678'
+            keyAlias '北京进化者机器人科技有限公司'
+        }
+    }
+
+
+    defaultConfig {
+        applicationId "com.efrobot.capturing"
+        minSdkVersion 16
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0." + getBuildTime();
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+//        android.applicationVariants.all { variant ->
+//            variant.outputs.each { output ->
+//                def outputFile = output.outputFile
+//                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+//                    //这里修改apk文件名
+//                    def fileName = getProject().name + "-" + variant.baseName + "-${defaultConfig.versionName}.apk"
+//                    output.outputFile = new File(outputFile.parent, fileName)
+//                }
+//            }
+//        }
+
+    }
+}
+
+def getBuildTime() {
+    //设置时间格式
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHH");
+    //获取当前时间
+    Date curDate = new Date(System.currentTimeMillis());
+    return formatter.format(curDate);
+}
+
+dependencies{
+    provided files(getLayoutLibPath())
+}
+
+def getLayoutLibPath(){
+    return "${android.getSdkDirectory().getAbsolutePath()}" + "/platforms/" +
+            android.compileSdkVersion + "/data/layoutlib.jar"
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.efrobot.library.net:mvpnetlibrary:0.0.31'
+    compile 'com.efrobot.library:framework:1.0.33'
+    //compile 'com.solidfire.code.gson:gson:2.6.2'
+    //compile 'com.solidfire.code.gson:gson-parent:2.6.2'
+    //compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4',classifier:'jdk15'
+    //compile group: 'com.alibaba', name: 'fastjson', version: '1.2.12'
+}
