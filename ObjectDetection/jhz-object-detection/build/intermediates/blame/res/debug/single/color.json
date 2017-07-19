@@ -1,38 +1,38 @@
 [
     {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_light.xml",
-        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_disable_only_material_light.xml"
-    },
-    {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
-        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_material_dark.xml"
-    },
-    {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
-        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
-    },
-    {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_dark.xml",
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_dark.xml",
         "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\switch_thumb_material_dark.xml"
     },
     {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\switch_thumb_material_light.xml",
         "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\switch_thumb_material_light.xml"
     },
     {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
-        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_secondary_text_material_light.xml"
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_dark.xml",
+        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_material_dark.xml"
     },
     {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
-        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_secondary_text_material_dark.xml"
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_light.xml",
+        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_disable_only_material_light.xml"
     },
     {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_search_url_text.xml",
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_disable_only_material_dark.xml",
+        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_disable_only_material_dark.xml"
+    },
+    {
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_search_url_text.xml",
         "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_search_url_text.xml"
     },
     {
-        "merged": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_primary_text_material_light.xml",
         "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_primary_text_material_light.xml"
+    },
+    {
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_light.xml",
+        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_secondary_text_material_light.xml"
+    },
+    {
+        "merged": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\res\\merged\\debug\\color\\abc_secondary_text_material_dark.xml",
+        "source": "C:\\Users\\LJ000PC\\.android\\build-cache\\f1db7be482b9daab4a394cdb7ec0325a2bad812d\\output\\res\\color\\abc_secondary_text_material_dark.xml"
     }
 ]

@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
+        "outputFile": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
         "map": [
             {
                 "to": {
@@ -12,7 +12,7 @@
                     "endOffset": 394
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\arrays.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\arrays.xml",
                     "position": {
                         "startLine": 30,
                         "startColumn": 4,
@@ -33,7 +33,7 @@
                     "endOffset": 719
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\arrays.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\arrays.xml",
                     "position": {
                         "startLine": 19,
                         "startColumn": 4,
@@ -2390,7 +2390,7 @@
                     "endOffset": 24695
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\dimens.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\dimens.xml",
                     "position": {
                         "startLine": 2,
                         "startColumn": 4,
@@ -2409,7 +2409,7 @@
                     "endOffset": 24751
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\dimens.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\dimens.xml",
                     "position": {
                         "startLine": 3,
                         "startColumn": 4,
@@ -3245,7 +3245,7 @@
                     "endOffset": 27575
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\strings.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\strings.xml",
                     "position": {
                         "startLine": 4,
                         "startColumn": 4,
@@ -3264,7 +3264,7 @@
                     "endOffset": 27625
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\strings.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\strings.xml",
                     "position": {
                         "startLine": 1,
                         "startColumn": 4,
@@ -3283,7 +3283,7 @@
                     "endOffset": 27678
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\strings.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\strings.xml",
                     "position": {
                         "startLine": 3,
                         "startColumn": 4,
@@ -3398,7 +3398,7 @@
                     "endOffset": 28231
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\styles.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\styles.xml",
                     "position": {
                         "startLine": 3,
                         "startColumn": 4,
@@ -6003,7 +6003,7 @@
                     "endOffset": 86448
                 },
                 "from": {
-                    "file": "F:\\000JHZ\\demo_renfeicui\\jhz-object-detection\\src\\main\\res\\values\\styles.xml",
+                    "file": "F:\\000JHZ\\000GitHubRepository\\JHZ_DL_Pro\\ObjectDetection\\jhz-object-detection\\src\\main\\res\\values\\styles.xml",
                     "position": {
                         "startLine": 7,
                         "startColumn": 4,

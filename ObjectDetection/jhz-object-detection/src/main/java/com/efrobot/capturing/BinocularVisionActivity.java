@@ -68,6 +68,8 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     private static final int UPDATE_UI = 2;
     private static final int UPDATE_UI_L = 3;
     private static final int UPDATE_UI_R = 4;
+    private static final int SEND_IMAGE_FAILURE = 5;
+    private static final int DETECTION_END = 6;
 
     private final static int TEST_PASS = 0;
     private final static int TEST_FAIL = -1;
@@ -119,7 +121,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 
     private boolean isLeftStop = true;
     private boolean isRightStop = true;
-    private boolean isStartActivity = true;
+    private boolean isBothStop = true;
 
     private int leftCameraIndex = 1;
     private int rightCameraIndex = 0;
@@ -133,6 +135,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     private boolean bODThread_End = false;
     private boolean bImageSave = false;
     private boolean bImageSendStart = false;
+    //private boolean bCallBackRes = true;
     long currentTime = 0;
     int count = 0;
     private int model = 0;//物体检测
@@ -140,6 +143,8 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     private String strODResult = "";
     private String strSaveTime = "";
     private String strSavePath = "";
+
+    //private ObjectDetectionThread objectDetectionThread = null;
 
     /**
      * 上传照片的结果数据
@@ -187,10 +192,9 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
             }
         }
         nCurrentCamIndex = leftCameraIndex;
-        //openCamera();
-        leftOpenCamera();
+        openCamera();
+        //leftOpenCamera();
         //rightOpenCamera();
-
         ObjectDetectionThread objectDetectionThread = new ObjectDetectionThread();
         objectDetectionThread.start();
 
@@ -208,6 +212,8 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 findViewById(R.id.begin_b_camera).setEnabled(false);
                 findViewById(R.id.stop_b_camera).setEnabled(true);
                 mDraw_BV.setVisibility(View.VISIBLE);
+
+                Log.d(TAG, "这里是----开始按钮");
             }
         });
 
@@ -223,7 +229,9 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 findViewById(R.id.begin_b_camera).setEnabled(true);
                 findViewById(R.id.stop_b_camera).setEnabled(false);
 
-                mDraw_BV.clearDraw();
+                Log.d(TAG, "这里是----停止按钮");
+                //mDraw_BV.clearDraw();
+                mHandler.sendEmptyMessage(DETECTION_END);
             }
         });
 
@@ -234,20 +242,20 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
             @Override
             public void onClick(final View v) {
                 //bODThread_End = true;
-                releaseCamera();
+//                releaseCamera();
                 if (nCurrentCamIndex == leftCameraIndex){
                     nCurrentCamIndex = rightCameraIndex;
                     mSaveTips.setText("双目-右摄像头");
-                    isLeftStop = true;
-                    isRightStop = false;
-                    rightOpenCamera();
+//                    isLeftStop = true;
+//                    isRightStop = false;
+//                    rightOpenCamera();
                 }
                 else{
                     nCurrentCamIndex = leftCameraIndex;
                     mSaveTips.setText("双目-左摄像头");
-                    isLeftStop = false;
-                    isRightStop = true;
-                    leftOpenCamera();
+//                    isLeftStop = false;
+//                    isRightStop = true;
+//                    leftOpenCamera();
                 }
                 //openCamera();
                 bImageSendStart = false;
@@ -255,7 +263,9 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 findViewById(R.id.begin_b_camera).setEnabled(true);
                 findViewById(R.id.stop_b_camera).setEnabled(true);
 
-                mDraw_BV.clearDraw();
+                Log.d(TAG, "这里是----切换镜头");
+                //mDraw_BV.clearDraw();
+                mHandler.sendEmptyMessage(DETECTION_END);
             }
         });
 
@@ -332,6 +342,68 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         });
     }
 
+    /**
+     * 双摄像头初始化
+     */
+    private void openCamera(){
+        int ret = -1;
+
+        isBothStop = true;
+
+        leftCamera = new StereoVision();
+        if (leftCamera.qInuseL() != 1) {
+            ret = leftCamera.openL(leftCameraIndex);
+        }
+        if (ret < 0) {
+            Toast.makeText(this, "Open left camera failed", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            ret = leftCamera.initL(width, height, cameraBufferNumber);
+            if (ret < 0) {
+                Toast.makeText(this, "Init left camera failed", Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                ret = leftCamera.streamonL();
+                if (ret < 0) {
+                    Toast.makeText(this, "Stream on left camera failed", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+        }
+
+        ret = -1;
+
+        //isRightStop = true;
+        rightCamera = new StereoVision();
+        if (rightCamera.qInuseR() != 1) {
+            ret = rightCamera.openR(rightCameraIndex);
+        }
+        if (ret < 0) {
+            Toast.makeText(this, "Open right Camera failed", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            ret = rightCamera.initR(width, height, cameraBufferNumber);
+            if (ret < 0) {
+                Toast.makeText(this, "Init right Camera failed", Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                ret = rightCamera.streamonR();
+                if (ret < 0) {
+                    Toast.makeText(this, "Stream on right Camera failed", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+        }
+
+        rightCamera.setCamParaR(0, 0, 0);
+        leftCamera.setCamParaL(0, 0, 0);
+        CameraBothReadThread cameraBothReadThread = new CameraBothReadThread();
+        cameraBothReadThread.start();
+    }
+
+    /**
+     * 左摄像头初始化
+     */
     private void leftOpenCamera(){
         int ret = -1;
 
@@ -363,6 +435,9 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 
     }
 
+    /**
+     * 右摄像头初始化
+     */
     private void rightOpenCamera() {
         int ret = -1;
 
@@ -397,6 +472,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     private void releaseCamera() {
         isLeftStop = true;
         isRightStop = true;
+        isBothStop = true;
 
         if (leftCamera != null)
             leftCamera.releaseL();
@@ -407,6 +483,65 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         rightCamera = null;
     }
 
+    /**
+     * 同时操作双摄像头的进程
+     */
+    class CameraBothReadThread extends Thread {
+        @Override
+        public void run() {
+            isBothStop = false;
+
+            while (true) {
+                if (isBothStop) {
+                    isBothStop = false;
+                    break;
+                }
+
+                int lCameraIndex = leftCamera.dqbufL(leftCameraYUVData);
+                if (lCameraIndex < 0) {
+                    break;
+                }
+                int rCameraIndex = rightCamera.dqbufR(rightCameraYUVData);
+                if (rCameraIndex < 0) {
+                    break;
+                }
+                leftCamera.yuvtorgbL(leftCameraYUVData, leftCameraRGBData, dwidth, dheight);
+                rightCamera.yuvtorgbR(rightCameraYUVData, rightCameraRGBData, dwidth, dheight);
+                //leftCameraBitmap.copyPixelsFromBuffer(leftCameraBuffer);
+                //rightCameraBitmap.copyPixelsFromBuffer(rightCameraBuffer);
+                //当前显示的图像
+                if (nCurrentCamIndex == rightCameraIndex)
+                {
+                    mHandler.sendEmptyMessage(UPDATE_UI_R);
+                }
+                else
+                {
+                    mHandler.sendEmptyMessage(UPDATE_UI_L);
+                }
+
+//                //启动图像检测的线程
+//                if (objectDetectionThread == null)
+//                {
+//                    objectDetectionThread = new ObjectDetectionThread();
+//                    objectDetectionThread.start();
+//                }
+
+//                if (isBothStop) {
+//                    leftCamera.releaseL();
+//                    rightCamera.releaseR();
+//                    break;
+//                }
+
+                leftCamera.qbufL(lCameraIndex);
+                rightCamera.qbufR(rCameraIndex);
+            }
+        }
+    }
+
+
+    /**
+     * 左摄像头显示视频进程
+     */
     class CameraReadThreadL extends Thread {
         @Override
         public void run() {
@@ -436,7 +571,9 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         }
     }
 
-
+    /**
+     * 右摄像头显示视频进程
+     */
     class CameraReadThreadR extends Thread {
         @Override
         public void run() {
@@ -624,13 +761,17 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         @Override
         public void run() {
             bODThread_End = false;
-
             while (true) {
                 if (bODThread_End) {
                     bODThread_End = false;
                     //bImageSave = false;
                     break;
                 }
+//                if (isBothStop) {
+//                    isBothStop = false;
+//                    //bImageSave = false;
+//                    break;
+//                }
                 if (nCurrentCamIndex == leftCameraIndex)
                 {
 //                    int cameraIndex = leftCamera.dqbufL(cameraYUVData_Save);
@@ -644,8 +785,17 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 //                        leftCamera.yuvtorgbL(cameraYUVData_Save, cameraRGBData_Save, dwidth, dheight);
 //                        cameraBitmap_Save.copyPixelsFromBuffer(cameraBuffer_Save);
 //                        save4SendFile(width,height,cameraYUVData_Save);
-                        save(leftCameraBitmap);
-                        mHandler.sendEmptyMessage(SHOW_IMAGE);
+                        Log.d(TAG, "这里是----图像检测");
+                        bImageSave = false;
+                        String name = getDate();
+                        Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        //bCallBackRes = true;
+                        save(leftCameraBitmapTemp,name,true);
+                        //bCallBackRes = false;
+                        save(rightCameraBitmapTemp,name,false);
+
+                        //mHandler.sendEmptyMessage(SHOW_IMAGE);
                         //leftCamera.qbufL(nCurrentCamIndex);
                     }
                 }
@@ -661,8 +811,15 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 //                        rightCamera.yuvtorgbR(cameraYUVData_Save, cameraRGBData_Save, dwidth, dheight);
 //                        cameraBitmap_Save.copyPixelsFromBuffer(cameraBuffer_Save);
                         //save4SendFile(width,height,cameraYUVData_Save);
-                        save(rightCameraBitmap);
-                        mHandler.sendEmptyMessage(SHOW_IMAGE);
+                        bImageSave = false;//等待当前图片处理完毕再继续下一张图片
+                        String name = getDate();
+                        Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        //bCallBackRes = true;
+                        save(rightCameraBitmapTemp,name,true);
+                        //bCallBackRes = false;
+                        save(leftCameraBitmapTemp,name,false);
+                        //mHandler.sendEmptyMessage(SHOW_IMAGE);
                        // rightCamera.qbufR(nCurrentCamIndex);
                     }
                 }
@@ -677,7 +834,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
      *
      * @param bitmap
      */
-    private void save(Bitmap bitmap) {
+    private void save(Bitmap bitmap,String name,boolean bCallBackRes) {
         final String timeName;
         if (currentTime == 0) {
 
@@ -714,9 +871,36 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 directory.mkdirs();
             }
 
-            String name = getDate();
+            //String name = getDate();
 
-            File file = new File(directory, name + ".png");
+            /**
+             * 发送到服务器,区分左右摄像头的图片
+             */
+            String strImageFileName;
+            if (nCurrentCamIndex == leftCameraIndex)
+            {
+                if (bCallBackRes)
+                {
+                    strImageFileName = name + "_left";
+                }
+                else
+                {
+                    strImageFileName = name + "_right";
+                }
+            }
+            else
+            {
+                if (bCallBackRes)
+                {
+                    strImageFileName = name + "_right";
+                }
+                else
+                {
+                    strImageFileName = name + "_left";
+                }
+            }
+
+            File file = new File(directory, strImageFileName + ".png");
 
             fos = new FileOutputStream(file);
             boolean compress = bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
@@ -724,11 +908,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 method1(SPEECH_PATH + "/cameName.txt", timeName);
                 count++;
             }
-
-            /**
-             * 发送到服务器
-             */
-            sendFile(SPEECH_PATH + "/pictures/" + name + ".png", name);
+            sendFile(SPEECH_PATH + "/pictures/" + strImageFileName + ".png", name, bCallBackRes);
             L.e("===>>>", name + " 保存是否成功:" + compress + "  file.exists:" + file.exists());
 
         } catch (FileNotFoundException e) {
@@ -821,10 +1001,10 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     }
 
     /**
-     * 时间
+     * 时间,精确到毫秒
      */
     public String getDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
         long time = System.currentTimeMillis();
         Date curDate = new Date(time);//获取当前时间
         String datetime = formatter.format(curDate);
@@ -856,7 +1036,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
      *
      * @param path 文件路径
      */
-    private void sendFile(final String path, final String time) {
+    private void sendFile(final String path, final String time, final boolean bCallBackRes) {
         try {
 
             final HashMap<String, Object> map = new HashMap<String, Object>();
@@ -876,7 +1056,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 @Override
                 public void onFail(FileMessage message, int errorCode, String errorMessage) {
                     L.e("===>>", "onFail   errorMessage=" + errorMessage);
-                    //handler.sendEmptyMessage(MESSAGE_SVAE_FAILURE);
+                    mHandler.sendEmptyMessage(SEND_IMAGE_FAILURE);
                     bImageSave = true;
                 }
 
@@ -889,7 +1069,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 public void onSuccess(FileMessage message, String result) {
                     L.e("===>>", "onSuccess=" + result);
                     bImageSave = true;
-                    if (!TextUtils.isEmpty(result) && !bODThread_End) {
+                    if (!TextUtils.isEmpty(result) && !bODThread_End && bCallBackRes) {
                         strODResult = result.toString();
                         strSavePath = path;
                         strSaveTime = time;
@@ -933,16 +1113,25 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         switch (msg.what) {
             case UPDATE_UI_L:
                 leftCameraBitmap.copyPixelsFromBuffer(leftCameraBuffer);
+                rightCameraBitmap.copyPixelsFromBuffer(rightCameraBuffer);
                 mCameraShow_BV.setImageBitmap(leftCameraBitmap);
                 leftCameraBuffer.clear();
-
+                rightCameraBuffer.clear();
                 break;
             case UPDATE_UI_R:
+                leftCameraBitmap.copyPixelsFromBuffer(leftCameraBuffer);
                 rightCameraBitmap.copyPixelsFromBuffer(rightCameraBuffer);
                 mCameraShow_BV.setImageBitmap(rightCameraBitmap);
+                leftCameraBuffer.clear();
                 rightCameraBuffer.clear();
                 break;
             case SHOW_IMAGE:
+                if (!bImageSendStart)//如果当前已停止检测，则应立即清除结果显示
+                {
+                    Log.d(TAG, "这里是----图像检测停止");
+                    mDraw_BV.clearDraw();
+                    break;
+                }
                 /**
                  * 拍照上传成功
                  */
@@ -996,9 +1185,17 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                     e.printStackTrace();
                 }
                 break;
+            case SEND_IMAGE_FAILURE:
+                RobotToastUtil.getInstance(theContext).showToast("图片上传失败,请检查网络");
+                break;
+            case DETECTION_END:
+                //Log.d(TAG, "这里是----图像检测停止");
+                mDraw_BV.clearDraw();
+                break;
             case NEXT_TEST:
-                isLeftStop = true;
-                isRightStop = true;
+//                isLeftStop = true;
+//                isRightStop = true;
+                isBothStop = true;
 
                 if (leftCamera != null)
                     leftCamera.releaseL();

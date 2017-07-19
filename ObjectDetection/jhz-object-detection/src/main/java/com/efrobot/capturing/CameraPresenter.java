@@ -171,7 +171,7 @@ public class CameraPresenter extends SpeechPresenter<ICameraView> {
                  * 拍照失败
                  */
                 if (!isStop) {
-                    showToast("图片上传失败");
+                    showToast("图片上传失败,请检查网络");
 //                    getHandler().sendEmptyMessage(0);
                 }
 

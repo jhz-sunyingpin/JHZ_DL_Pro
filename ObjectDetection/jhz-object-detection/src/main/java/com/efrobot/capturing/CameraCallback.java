@@ -1116,8 +1116,8 @@ public class CameraCallback implements SurfaceHolder.Callback {
                 @Override
                 public void onFail(FileMessage message, int errorCode, String errorMessage) {
                     L.e("===>>", "onFail   errorMessage=" + errorMessage);
-                    //handler.sendEmptyMessage(MESSAGE_SVAE_FAILURE);
                     currentSave = true;
+                    handler.sendEmptyMessage(MESSAGE_SVAE_FAILURE);
                 }
 
                 @Override
@@ -1233,7 +1233,7 @@ public class CameraCallback implements SurfaceHolder.Callback {
      * 时间
      */
     public String getDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
         long time = System.currentTimeMillis();
         Date curDate = new Date(time);//获取当前时间
         String datetime = formatter.format(curDate);
