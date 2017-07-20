@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -213,7 +214,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 findViewById(R.id.stop_b_camera).setEnabled(true);
                 mDraw_BV.setVisibility(View.VISIBLE);
 
-                Log.d(TAG, "这里是----开始按钮");
+                //Log.d(TAG, "这里是----开始按钮");
             }
         });
 
@@ -229,7 +230,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 findViewById(R.id.begin_b_camera).setEnabled(true);
                 findViewById(R.id.stop_b_camera).setEnabled(false);
 
-                Log.d(TAG, "这里是----停止按钮");
+                //Log.d(TAG, "这里是----停止按钮");
                 //mDraw_BV.clearDraw();
                 mHandler.sendEmptyMessage(DETECTION_END);
             }
@@ -263,7 +264,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 findViewById(R.id.begin_b_camera).setEnabled(true);
                 findViewById(R.id.stop_b_camera).setEnabled(true);
 
-                Log.d(TAG, "这里是----切换镜头");
+                //Log.d(TAG, "这里是----切换镜头");
                 //mDraw_BV.clearDraw();
                 mHandler.sendEmptyMessage(DETECTION_END);
             }
@@ -785,8 +786,8 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 //                        leftCamera.yuvtorgbL(cameraYUVData_Save, cameraRGBData_Save, dwidth, dheight);
 //                        cameraBitmap_Save.copyPixelsFromBuffer(cameraBuffer_Save);
 //                        save4SendFile(width,height,cameraYUVData_Save);
-                        Log.d(TAG, "这里是----图像检测");
-                        bImageSave = false;
+                        //Log.d(TAG, "这里是----图像检测");
+                        bImageSave = false;//等待当前图片处理完毕再继续下一张图片
                         String name = getDate();
                         Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
                         Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
@@ -1128,7 +1129,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
             case SHOW_IMAGE:
                 if (!bImageSendStart)//如果当前已停止检测，则应立即清除结果显示
                 {
-                    Log.d(TAG, "这里是----图像检测停止");
+                    //Log.d(TAG, "这里是----图像检测停止");
                     mDraw_BV.clearDraw();
                     break;
                 }
@@ -1196,6 +1197,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 //                isLeftStop = true;
 //                isRightStop = true;
                 isBothStop = true;
+                bODThread_End = true;
 
                 if (leftCamera != null)
                     leftCamera.releaseL();
@@ -1281,5 +1283,17 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     public void onBackPressed()
     {
         finish();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            Intent myIntent = new Intent();
+            myIntent = new Intent(BinocularVisionActivity.this, HomeActivity.class);
+            startActivity(myIntent);
+            this.finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

@@ -2,6 +2,8 @@ package com.efrobot.capturing;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -336,6 +338,18 @@ public class CameraActivity extends PresenterActivity<CameraPresenter> implement
     public void onBackPressed()
     {
         finish();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if(keyCode == KeyEvent.KEYCODE_BACK){
+            Intent myIntent = new Intent();
+            myIntent = new Intent(CameraActivity.this, HomeActivity.class);
+            startActivity(myIntent);
+            this.finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
 //    @Override
