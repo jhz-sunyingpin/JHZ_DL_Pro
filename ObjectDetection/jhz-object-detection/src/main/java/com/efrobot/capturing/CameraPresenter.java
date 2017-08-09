@@ -143,6 +143,10 @@ public class CameraPresenter extends SpeechPresenter<ICameraView> {
                                     OneObjectResult object1 = new OneObjectResult(classname,prob,xMin,yMin,xMax,yMax);
                                     objectResults.add(object1);
                                 }
+                                if (objectResults.size() < 1)
+                                {
+                                    showToast("没有检测到任何目标物体");
+                                }
                                 //resultBean = new ResultBean(objectResults, "",time, path);
                                 resultBean.setObjectResults(objectResults);
                                 resultBean.setDate(time);

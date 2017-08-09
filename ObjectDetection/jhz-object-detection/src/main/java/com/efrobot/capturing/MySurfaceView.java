@@ -80,7 +80,12 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
         return String.format("%.2f", value).toString();
     }
 
-    //颜色定义
+    /**
+     * 物体标记框颜色定义
+     *
+     * @param strObject
+     *            物体名称
+     */
     public int objectColor(String strObject)
     {
         int  color = Color.WHITE;
@@ -144,9 +149,13 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
             int nMinY = objectResult.getY_min();
             int nMaxY = objectResult.getY_max();
 
-            String strText = strClassName + " " + strProb;
+            float fX = objectResult.getWorldCor_x();
+            float fY = objectResult.getWorldCor_y();
+            float fZ = objectResult.getWorldCor_z();
+
+            String strText = strClassName + " " + strProb + " " + "[" + fX + ","+ fY + ","+ fZ + "]";
             Rect rect = new Rect();
-            p.getTextBounds(strText,0,strText.length(),rect);
+            p.getTextBounds(strText,0,strText.length(),rect);//获取文字显示框大小
 
             if (mSwitched)
             {
@@ -171,7 +180,8 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 canvas.drawRect(nMinY,nTemp,nMinY + rect.width(),nMinX + halfHeigth,p);
                 p.setColor(Color.BLACK);
                 p.setStyle(Style.FILL);
-                canvas.drawText(strClassName + " " + dProb,nMinY,nMinX,p);
+                //canvas.drawText(strClassName + " " + dProb,nMinY,nMinX,p);
+                canvas.drawText(strText,nMinY,nMinX,p);
             }
             else {
                 nMinX = Math.round(nMinX * mRatioWidth);
@@ -191,7 +201,8 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 canvas.drawRect(nMinX,nTemp,nMinX + rect.width(),nMinY + halfHeigth,p);
                 p.setColor(Color.BLACK);
                 p.setStyle(Style.FILL);
-                canvas.drawText(strClassName + " " + strProb,nMinX,nMinY,p);
+                //canvas.drawText(strClassName + " " + strProb,nMinX,nMinY,p);
+                canvas.drawText(strText,nMinX,nMinY,p);
 
             }
         }

@@ -69,6 +69,12 @@ android {
 //        }
 
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 def getBuildTime() {

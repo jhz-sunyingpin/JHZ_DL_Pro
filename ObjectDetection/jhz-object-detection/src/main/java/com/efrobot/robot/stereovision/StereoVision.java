@@ -5,6 +5,7 @@ public class StereoVision {
 	static {
 		System.loadLibrary("ffmpegutils");
 		System.loadLibrary("visionCameraCalibration");
+		System.loadLibrary("visionObjectLocation");
 //		System.loadLibrary("visionCalcCalibrationPos1");
 //		System.loadLibrary("visionCalcCalibrationPos");
 //		System.loadLibrary("visionDetectDistance");
@@ -251,5 +252,35 @@ public class StereoVision {
 	 * 数组  2：fBoardCalibAngle  标定板应转的角度 左负右正    out
 	 */
 	public native float[] CalculateRobotCalibTwoAngle(byte[] buf1, byte[] buf2, int dwidth, int dheight, String jstrSavePath, int nBoardX, int nBoardY, float squareSize);
+	/************************************************************************/
+	/* 函数名：ObjectLocation(byte[] jbtImgDataL,byte[] jbtImgDataR,int dwidth,int dheight,
+				float[] jfGlobalData,float[] jfObjectInfo,int nObjectSize,
+				float[] jfCamPara,int picNum)
+	 * 文件名：visionObjectLocation.so
+
+	 * 时  间：20170801
+	 * 作  者：薛林
+	 * 功  能：对双目识别的物体进行定位
+	 * 输  入：
+	 *         jbtImgDataL：    左摄像头采集的RGB565图像数据
+	 *         jbtImgDataR：    右摄像头采集的RGB565图像数据
+	 *         dwidth：                 图像的宽
+	 *         dheight：              图像的高
+	 *         jfGlobalData: 3位数组，表示机器人当前在世界坐标系下的坐标（x,y,theta）
+	 *         jfObjectInfo: 物体识别信息，每个物体信息存储顺序依次为：物品类别ID，物品概率，物品在左图像外接矩形左上点x、y，右下点x、y
+	 *         nObjectSize：   识别物体的个数
+	 *         jfCamPara：        摄像头参数
+	 *		   picnum 是否保存图像和数据，若picnum>0,则在根目录下的Data文件夹内保存图像和数据，保存名字的序号与picnum相同，即picnum+L.bmp、picnum+R.bmp、picnum+ResultL.png、picnum+ResultR.png
+	 *		                          同时保存过程数据ObjectInfo.txt内为物体检测的数据：对应图片ID，检测物体的数量，以后顺序保存物体识别信息，每个物体信息存储顺序依次为：物品类别ID，物品概率，物品在左图像外接矩形左上点x、y，右下点x、y
+	 *		          ObjectWorldInfo.txt 内为物体定位的空间坐标: 对应图片ID,检测物体的数量，定位物体的数量，以后5位一组：0（物品类别ID）、1（物品概率）、2（物品中心在世界坐标系下的x坐标）、3（物品中心在世界坐标系下的y坐标）、4（物品中心在世界坐标系下的z坐标）
+	 * 输  出：无
+	 * 返回值：float[]仅返回有实际空间位置的物体检测
+	 *         Null 输入数据为空
+	 *		        数组长度为1，值为0：摄像头参数错误
+	 *		        数组长度为1，值为非0:算法识别错误
+	 *         数组长度为5的倍数，每5位表示：
+	 *         		0（物品类别ID）、1（物品概率）、2（物品中心在世界坐标系下的x坐标）、3（物品中心在世界坐标系下的y坐标）、4（物品中心在世界坐标系下的z坐标）
+	/************************************************************************/
+	public native float[] ObjectLocation(byte[] jbtImgDataL,byte[] jbtImgDataR,int dwidth,int dheight,float[] jfGlobalData,float[] jfObjectInfo,int nObjectSize,float[] jfCamPara,int picNum);
 
 }

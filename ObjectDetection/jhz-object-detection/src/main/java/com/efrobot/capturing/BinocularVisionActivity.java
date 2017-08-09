@@ -29,15 +29,21 @@ import com.efrobot.library.net.SendRequestListener;
 import com.efrobot.robot.stereovision.StereoVision;
 
 import com.efrobot.library.RobotManager;
+import com.efrobot.library.task.NavigationManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
@@ -48,6 +54,7 @@ import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -72,6 +79,18 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     private static final int SEND_IMAGE_FAILURE = 5;
     private static final int DETECTION_END = 6;
 
+    private static final  float OBJECT_SOFA = 0;
+    private static final  float OBJECT_TEATABLE = 1;
+    private static final  float OBJECT_TVCABINET = 2;
+    private static final  float OBJECT_TV = 3;
+    private static final  float OBJECT_DESK = 4;
+    private static final  float OBJECT_BOOKCASE = 5;
+    private static final  float OBJECT_BED = 6;
+    private static final  float OBJECT_BESIDECABINET = 7;
+    private static final  float OBJECT_DININGTABLE = 8;
+    private static final  float OBJECT_WARDROBE = 9;
+    private static final  float OBJECT_NULL = -1;
+
     private final static int TEST_PASS = 0;
     private final static int TEST_FAIL = -1;
     private final static int TEST_NOT = 2;
@@ -92,6 +111,15 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     private Bitmap rightCameraBitmap;
     private ByteBuffer leftCameraBuffer;
     private ByteBuffer rightCameraBuffer;
+
+    //获取RGB数据提供给定位接口，必须保证与检测的Bitmap对应
+    private byte[] leftCameraRGBDataTemp;
+    private byte[] rightCameraRGBDataTemp;
+    private Bitmap leftCameraBitmapTemp;
+    private Bitmap rightCameraBitmapTemp;
+    private ByteBuffer leftCameraBufferTemp;
+    private ByteBuffer rightCameraBufferTemp;
+
     private StereoVision leftCamera;
     private StereoVision rightCamera;
 
@@ -115,11 +143,13 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
      */
     private MySurfaceView mDraw_BV;
 
-    private Button mSaveBtn1, mSaveBtn2, mSaveBtn3;
+    //private Button mSaveBtn1, mSaveBtn2, mSaveBtn3;
+    //摄像头使用标注
     private TextView mSaveTips;
-    public static final String ROOT_PATH = Environment.getExternalStorageDirectory() + "/efrobot/";
-    public static final String ROOT_PARAMS_PATH = ROOT_PATH + "params/";
+    //public static final String ROOT_PATH = Environment.getExternalStorageDirectory() + "/efrobot/";
+    //public static final String ROOT_PARAMS_PATH = ROOT_PATH + "params/";
 
+    //双目摄像头进程控制参数
     private boolean isLeftStop = true;
     private boolean isRightStop = true;
     private boolean isBothStop = true;
@@ -129,32 +159,64 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 
     private BaseHandler mHandler;
 
-    private CameraPresenter cameraPresenter;
-
+    //标记当前显示图像来自的摄像头
     private int nCurrentCamIndex = leftCameraIndex;
 
+    //物体检测线程控制参数
     private boolean bODThread_End = false;
+    //图像上传服务器是否成功标记
     private boolean bImageSave = false;
+    //开始和停止按钮控制图像上传起止参数
     private boolean bImageSendStart = false;
     //private boolean bCallBackRes = true;
     long currentTime = 0;
     int count = 0;
     private int model = 0;//物体检测
+    //图像临时本地保存根目录
     public static final String SPEECH_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/efrobot/camera";
     private String strODResult = "";
     private String strSaveTime = "";
     private String strSavePath = "";
 
+    //摄像头参数
+    private float[] params;
+    // 摄像头是否处于打开的状态
+    public static boolean cameraIsOpen = false;
+    //检测物体信息
+    private float[] jfObjectInfo;
+    //检测到的物体数
+    private int nObjectSize;
+    //定位的最大物体个数
+    private int OBJECTMAXNUM = 100;
+    //定位信息
+    private float[] pLocationInfo;
+    //世界坐标系坐标
+    float[] jfGlobalData = new float[3];
+    //已检测图像数
+    private int nODNum = 0;
+
+    RobotManager mRobotManager;
+    //文件加密解密算法类-DES
+    DesUtil desUtil;
+
     //private ObjectDetectionThread objectDetectionThread = null;
 
-    /**
-     * 上传照片的结果数据
-     */
+    //上传图片的检测结果
     public ResultBean resultBean = new ResultBean();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        File sdFile = Environment.getExternalStorageDirectory();
+//        String newFolderPath = sdFile.getPath() + "/odImages";
+//        File newFile = new File(newFolderPath);
+//        if (!newFile.exists())
+//            newFile.mkdir();
+//        desUtil = new DesUtil();
+//        desUtil.setKeyfileName(newFolderPath + "/DesKey.xml");
+//        desUtil.saveDesKey();
+
+        nODNum = 0;
 
         fullScreen();
         setContentView(R.layout.binocularcam_layout);
@@ -175,10 +237,20 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         rightCameraBitmap = Bitmap.createBitmap(dwidth, dheight, Bitmap.Config.RGB_565);
         rightCameraBuffer = ByteBuffer.wrap(rightCameraRGBData);
 
+        leftCameraRGBDataTemp = new byte[dwidth * dheight * 2];
+        leftCameraBitmapTemp = Bitmap.createBitmap(dwidth, dheight, Bitmap.Config.RGB_565);
+        leftCameraBufferTemp = ByteBuffer.wrap(leftCameraRGBDataTemp);
+        rightCameraRGBDataTemp = new byte[dwidth * dheight * 2];
+        rightCameraBitmapTemp = Bitmap.createBitmap(dwidth, dheight, Bitmap.Config.RGB_565);
+        rightCameraBufferTemp = ByteBuffer.wrap(rightCameraRGBDataTemp);
+
         cameraYUVData_Save = new byte[width * height * 2];
         cameraRGBData_Save = new byte[dwidth * dheight * 2];
         cameraBitmap_Save = Bitmap.createBitmap(dwidth, dheight, Bitmap.Config.RGB_565);
         cameraBuffer_Save = ByteBuffer.wrap(cameraRGBData_Save);
+
+        jfObjectInfo = new float[OBJECTMAXNUM * 6];
+        mRobotManager = RobotManager.getInstance(this);
 
         String version = SystemProperties.get("ro.product.display", "unknow");
         Log.d(TAG, "version: " + version);
@@ -192,6 +264,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 rightCameraIndex =1;
             }
         }
+        params = readCameraParams();
         nCurrentCamIndex = leftCameraIndex;
         openCamera();
         //leftOpenCamera();
@@ -400,6 +473,8 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         leftCamera.setCamParaL(0, 0, 0);
         CameraBothReadThread cameraBothReadThread = new CameraBothReadThread();
         cameraBothReadThread.start();
+
+        cameraIsOpen = true;
     }
 
     /**
@@ -474,6 +549,8 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         isLeftStop = true;
         isRightStop = true;
         isBothStop = true;
+
+        cameraIsOpen = false;
 
         if (leftCamera != null)
             leftCamera.releaseL();
@@ -765,20 +842,11 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
             while (true) {
                 if (bODThread_End) {
                     bODThread_End = false;
-                    //bImageSave = false;
                     break;
                 }
-//                if (isBothStop) {
-//                    isBothStop = false;
-//                    //bImageSave = false;
-//                    break;
-//                }
+                //当前定位接口只在左图像检测时有作用
                 if (nCurrentCamIndex == leftCameraIndex)
                 {
-//                    int cameraIndex = leftCamera.dqbufL(cameraYUVData_Save);
-//                    if (cameraIndex < 0) {
-//                        break;
-//                    }
 
                     if (bImageSendStart && bImageSave) {
 //                       System.arraycopy(leftCameraYUVData,0,cameraYUVData_Save,0,leftCameraYUVData.length);
@@ -789,15 +857,23 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                         //Log.d(TAG, "这里是----图像检测");
                         bImageSave = false;//等待当前图片处理完毕再继续下一张图片
                         String name = getDate();
-                        Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
-                        Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
-                        //bCallBackRes = true;
+                        //Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        //获取RGB数据提供给定位接口，必须保证与Bitmap对应
+                        //leftCameraRGBDataTemp = (byte[])leftCameraRGBData.clone();
+                        System.arraycopy(leftCameraRGBData,0,leftCameraRGBDataTemp,0,width * height * 2);
+                        leftCameraBitmapTemp.copyPixelsFromBuffer(leftCameraBufferTemp);
+                        //Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        System.arraycopy(rightCameraRGBData,0,rightCameraRGBDataTemp,0,width * height * 2);
+                        //rightCameraBitmapTemp.copyPixelsFromBuffer(rightCameraBufferTemp);
+                        ////bCallBackRes = true;
+                        //只对左图像做检测(保存图像到本地，上传图像到服务器、接收服务器返回结果、显示检测结果)
                         save(leftCameraBitmapTemp,name,true);
-                        //bCallBackRes = false;
-                        save(rightCameraBitmapTemp,name,false);
+                        leftCameraBufferTemp.clear();
+                        ////bCallBackRes = false;
+                        //save(rightCameraBitmapTemp,name,false);//为薛林提供匹配图像
 
-                        //mHandler.sendEmptyMessage(SHOW_IMAGE);
-                        //leftCamera.qbufL(nCurrentCamIndex);
+                        ////mHandler.sendEmptyMessage(SHOW_IMAGE);
+                        ////leftCamera.qbufL(nCurrentCamIndex);
                     }
                 }
                 else
@@ -814,14 +890,18 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                         //save4SendFile(width,height,cameraYUVData_Save);
                         bImageSave = false;//等待当前图片处理完毕再继续下一张图片
                         String name = getDate();
-                        Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
-                        Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
-                        //bCallBackRes = true;
+                        //Bitmap leftCameraBitmapTemp = leftCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        //Bitmap rightCameraBitmapTemp = rightCameraBitmap.copy(Bitmap.Config.RGB_565,true);
+                        System.arraycopy(rightCameraRGBData,0,rightCameraRGBDataTemp,0,width * height * 2);
+                        rightCameraBitmapTemp.copyPixelsFromBuffer(rightCameraBufferTemp);
+                        System.arraycopy(leftCameraRGBData,0,leftCameraRGBDataTemp,0,width * height * 2);
+                        ////bCallBackRes = true;
                         save(rightCameraBitmapTemp,name,true);
-                        //bCallBackRes = false;
-                        save(leftCameraBitmapTemp,name,false);
-                        //mHandler.sendEmptyMessage(SHOW_IMAGE);
-                       // rightCamera.qbufR(nCurrentCamIndex);
+                        rightCameraBufferTemp.clear();
+                        ////bCallBackRes = false;
+                        //save(leftCameraBitmapTemp,name,false);//为薛林提供匹配图像
+                        ////mHandler.sendEmptyMessage(SHOW_IMAGE);
+                        //// rightCamera.qbufR(nCurrentCamIndex);
                     }
                 }
 
@@ -831,9 +911,14 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
 
 
     /**
-     * 保存
+     * 图像检测主接口
      *
      * @param bitmap
+     *          待检测图像
+     * @param name
+     *          图像保存文件名
+     * @param  bCallBackRes
+     *          当前图像是否将被检测(只对当前显示的摄像头图像做检测，左右图像都保存到服务器)
      */
     private void save(Bitmap bitmap,String name,boolean bCallBackRes) {
         final String timeName;
@@ -1005,7 +1090,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
      * 时间,精确到毫秒
      */
     public String getDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS");
         long time = System.currentTimeMillis();
         Date curDate = new Date(time);//获取当前时间
         String datetime = formatter.format(curDate);
@@ -1036,6 +1121,9 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
      * 发送文件
      *
      * @param path 文件路径
+     * @param time 时间戳
+     * @param  bCallBackRes
+     *          当前图像是否将被检测(只对当前显示的摄像头图像做检测，左右图像都保存到服务器)
      */
     private void sendFile(final String path, final String time, final boolean bCallBackRes) {
         try {
@@ -1050,7 +1138,30 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
             message.setUrl(AndroidConstants.UPLOAD_URL);//http://101.200.194.252:8080/v1/word/form/pic
             message.setRequestMethod(FileMessage.REQUEST_METHOD_POST);
             message.setSendMethod(FileMessage.SEND_METHOD_INTERNET);
-            message.setConnectTimeout(10 * 60);
+            message.setConnectTimeout(10 * 60);//设置延迟
+
+//            //测试文件加密解密
+//            //File sdFile = Environment.getDataDirectory();//数据目录
+//            File sdFile = Environment.getExternalStorageDirectory();
+//            String newFolderPath = sdFile.getPath() + "/odImages";
+//            File newFile = new File(newFolderPath);
+//            if (!newFile.exists())
+//                newFile.mkdir();
+//            String dateTime = getDate();
+//            String rgbFileName = dateTime + ".log";
+//            String rgbFileName_encrypt = dateTime + "_encrypt.txt";
+//            String rgbFileName_decrypt = dateTime + "_decrypt.txt";
+//            //createFileWithByte(leftCameraRGBData,newFolderPath + "/" + rgbFileName);
+//            String desKey = "testDESKEY";
+//            try {
+//                //desUtil.encrypt(newFolderPath + "/" + rgbFileName,newFolderPath + "/" + rgbFileName_encrypt);
+//                //desUtil.decrypt(newFolderPath + "/" + rgbFileName_encrypt,newFolderPath + "/" + rgbFileName_decrypt);
+//                desUtil.encrypt(leftCameraRGBData,desKey,newFolderPath + "/" + rgbFileName_encrypt);
+//                desUtil.decrypt(desKey,newFolderPath + "/" + rgbFileName_encrypt,newFolderPath + "/" + rgbFileName_decrypt);
+//            }catch (Exception e)
+//            {
+//                e.printStackTrace();
+//            }
 
             L.e("Log=====", "发送文件URL--->" + message.getUrl());
             ControlApplication.from(theContext).getNetClient().sendNetMessage(message, new SendRequestListener<FileMessage>() {
@@ -1069,13 +1180,13 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 @Override
                 public void onSuccess(FileMessage message, String result) {
                     L.e("===>>", "onSuccess=" + result);
-                    bImageSave = true;
                     if (!TextUtils.isEmpty(result) && !bODThread_End && bCallBackRes) {
                         strODResult = result.toString();
                         strSavePath = path;
                         strSaveTime = time;
                         mHandler.sendEmptyMessage(SHOW_IMAGE);
                     }
+                    bImageSave = true;
                 }
             });
 
@@ -1114,16 +1225,16 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         switch (msg.what) {
             case UPDATE_UI_L:
                 leftCameraBitmap.copyPixelsFromBuffer(leftCameraBuffer);
-                rightCameraBitmap.copyPixelsFromBuffer(rightCameraBuffer);
+                //rightCameraBitmap.copyPixelsFromBuffer(rightCameraBuffer);
                 mCameraShow_BV.setImageBitmap(leftCameraBitmap);
                 leftCameraBuffer.clear();
-                rightCameraBuffer.clear();
+                //rightCameraBuffer.clear();
                 break;
             case UPDATE_UI_R:
-                leftCameraBitmap.copyPixelsFromBuffer(leftCameraBuffer);
+                //leftCameraBitmap.copyPixelsFromBuffer(leftCameraBuffer);
                 rightCameraBitmap.copyPixelsFromBuffer(rightCameraBuffer);
                 mCameraShow_BV.setImageBitmap(rightCameraBitmap);
-                leftCameraBuffer.clear();
+                //leftCameraBuffer.clear();
                 rightCameraBuffer.clear();
                 break;
             case SHOW_IMAGE:
@@ -1142,7 +1253,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                 try {
                     if (TextUtils.isEmpty(data)) {
                         RobotToastUtil.getInstance(theContext).showToast("上传失败");
-                        return;
+                        break;
                     }
                     JSONObject jsonObject = new JSONObject(data);
                     if (jsonObject.has("resultCode") && "SUCCESS".equals(jsonObject.optString("resultCode"))) {
@@ -1165,6 +1276,91 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                                     OneObjectResult object1 = new OneObjectResult(classname,prob,xMin,yMin,xMax,yMax);
                                     objectResults.add(object1);
                                 }
+                                if (objectResults.size() < 1)
+                                {
+                                    RobotToastUtil.getInstance(theContext).showToast("没有检测到任何目标物体");
+                                    break;
+                                }
+                                //仅检测左摄像头图像时，执行定位功能
+                                if (cameraIsOpen && nCurrentCamIndex == leftCameraIndex) {
+                                    if (params == null || params.length == 0) {
+                                        params = readCameraParams();
+                                    }
+
+                                    nObjectSize = objectResults.size();//检测到的物体数
+
+                                    if (nObjectSize < OBJECTMAXNUM && nObjectSize > 0)
+                                    {
+                                        //jfObjectInfo = new float[nObjectSize * 6];
+                                        for (int i = 0; i < nObjectSize; i++)
+                                        {
+                                            OneObjectResult objectResult = objectResults.get(i);
+                                            String strClassName = objectResult.getClass_name();
+                                            jfObjectInfo[i*6] = objectID(strClassName);
+                                            jfObjectInfo[i*6 + 1] = (float)(objectResult.getProbability());
+                                            jfObjectInfo[i*6 + 2] = (float)objectResult.getX_min();
+                                            jfObjectInfo[i*6 + 3] = (float)objectResult.getY_min();
+                                            jfObjectInfo[i*6 + 4] = (float)objectResult.getX_max();
+                                            jfObjectInfo[i*6 + 5]= (float)objectResult.getY_max();
+                                        }
+
+                                        try {
+                                            mRobotManager.getNavigationInstance().startRequestLocation(0, 1, 1, new NavigationManager.OnLocationChangeListener() {
+                                                @Override
+                                                public void onLocationChangeListener(int type, float locationX, float locationY, float locationAngle) {
+                                                    jfGlobalData[0] = locationX * 120;
+                                                    jfGlobalData[1] = locationY * 120;
+                                                    jfGlobalData[2] = locationAngle;
+                                                    for (float i : jfGlobalData) {
+                                                        Log.d(TAG, "handleMessage: location  " + i);
+                                                    }
+                                                }
+                                            });
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+//                                        //测试文件加密解密
+//                                        File sdFile = Environment.getDataDirectory();//数据目录
+//                                        String newFolderPath = sdFile.getPath() + "/odImages";
+//                                        File newFile = new File(newFolderPath);
+//                                        if (!newFile.exists())
+//                                            newFile.mkdir();
+//                                        String dateTime = getDate();
+//                                        String rgbFileName = dateTime + ".log";
+//                                        String rgbFileName_encrypt = dateTime + "_encrypt.log";
+//                                        String rgbFileName_decrypt = dateTime + "_decrypt.log";
+//                                        createFileWithByte(leftCameraRGBDataTemp,newFolderPath + "/" + rgbFileName);
+//                                        try {
+//                                            DesUtil.encrypt(newFolderPath + "/" + rgbFileName,newFolderPath + "/" + rgbFileName_encrypt);
+//                                            DesUtil.decrypt(newFolderPath + "/" + rgbFileName_encrypt,newFolderPath + "/" + rgbFileName_decrypt);
+//                                        }catch (Exception e)
+//                                        {
+//                                            e.printStackTrace();
+//                                        }
+                                        nODNum++;
+                                        pLocationInfo = leftCamera.ObjectLocation(leftCameraRGBDataTemp,rightCameraRGBDataTemp,width,height,jfGlobalData,jfObjectInfo,nObjectSize,params,nODNum);
+                                        if (pLocationInfo!=null)
+                                        {
+                                            if (pLocationInfo.length % 5 != 0 || pLocationInfo.length == 0)
+                                            {
+                                                RobotToastUtil.getInstance(theContext).showToast("定位失败");
+                                            }
+                                            else
+                                            {
+                                                Log.d(TAG, "detected object: location  " + Arrays.toString(pLocationInfo));
+                                                for (int i = 0; i < nObjectSize; i++) {
+                                                    OneObjectResult objectResult = objectResults.get(i);
+                                                    objectResult.setWorldCor_x(pLocationInfo[i * 5 + 2]);
+                                                    objectResult.setWorldCor_y(pLocationInfo[i * 5 + 3]);
+                                                    objectResult.setWorldCor_z(pLocationInfo[i * 5 + 4]);
+                                                    objectResults.set(i,objectResult);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 //resultBean = new ResultBean(objectResults, "",time, path);
                                 resultBean.setObjectResults(objectResults);
                                 resultBean.setDate(strSaveTime);
@@ -1175,6 +1371,7 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
                                     mDraw_BV.setResultBean(resultBean);
                                     mDraw_BV.drawCanvas();
                                 }
+                                //bImageSave = true;
                             }
                         }
 
@@ -1211,6 +1408,59 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
         }
     }
 
+    /**
+     * 根据byte数组生成文件
+     *
+     * @param bytes
+     *            生成文件用到的byte数组
+     */
+    private void createFileWithByte(byte[] bytes,String filePath) {
+        // TODO Auto-generated method stub
+        /**
+         * 创建File对象，其中包含文件所在的目录以及文件的命名
+         */
+        File file = new File(filePath);
+        // 创建FileOutputStream对象
+        FileOutputStream outputStream = null;
+        // 创建BufferedOutputStream对象
+        BufferedOutputStream bufferedOutputStream = null;
+        try {
+            // 如果文件存在则删除
+            if (file.exists()) {
+                file.delete();
+            }
+            // 在文件系统中根据路径创建一个新的空文件
+            file.createNewFile();
+            // 获取FileOutputStream对象
+            outputStream = new FileOutputStream(file);
+            // 获取BufferedOutputStream对象
+            bufferedOutputStream = new BufferedOutputStream(outputStream);
+            // 往文件所在的缓冲输出流中写byte数据
+            bufferedOutputStream.write(bytes);
+            // 刷出缓冲输出流，该步很关键，要是不执行flush()方法，那么文件的内容是空的。
+            bufferedOutputStream.flush();
+        } catch (Exception e) {
+            // 打印异常信息
+            e.printStackTrace();
+        } finally {
+            // 关闭创建的流对象
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (bufferedOutputStream != null) {
+                try {
+                    bufferedOutputStream.close();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+            }
+        }
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -1240,12 +1490,81 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
     public void onDestroy() {
         super.onDestroy();
 
-        releaseCamera();
         bODThread_End = true;
+        releaseCamera();
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
         }
+    }
+
+    /**
+     * 以字符为单位读取文件，常用于读文本，数字等类型的文件
+     */
+    public static float[] readCameraParams() {
+        List<Float> params = new ArrayList<Float>();
+        String path = Environment.getExternalStorageDirectory() + "/efrobot/params/server_camera_params.txt";
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                params.add(Float.parseFloat(line));
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Float[] fArr = params.toArray(new Float[params.size()]);
+        float[] result = new float[fArr.length];
+        for (int i = 0; i < fArr.length; i++) {
+            result[i] = fArr[i];
+            //  Log.d("GG", "readCameraParams: " + fArr[i]);
+        }
+        return result;
+    }
+
+    /**
+     * 物体ID定义
+     *
+     * @param strObject
+     *            物体名称
+     */
+    public float objectID(String strObject)
+    {
+        float id = OBJECT_NULL;
+        switch(strObject){
+            case "sofa":
+                id = OBJECT_SOFA;
+                break;
+            case "teatable":
+                id = OBJECT_TEATABLE;
+                break;
+            case "tvcabinet":
+                id = OBJECT_TVCABINET;
+                break;
+            case "tv":
+                id = OBJECT_TV;
+                break;
+            case "desk":
+                id = OBJECT_DESK;
+                break;
+            case "bookcase":
+                id = OBJECT_BOOKCASE;
+                break;
+            case "bed":
+                id = OBJECT_BED;
+                break;
+            case "bedsidecabinet":
+                id = OBJECT_BESIDECABINET;
+                break;
+            case "diningtable":
+                id = OBJECT_DININGTABLE;
+                break;
+            case "wardrobe":
+                id = OBJECT_WARDROBE;
+                break;
+        }
+        return id;
     }
 
     public void fullScreen() {
@@ -1295,5 +1614,79 @@ public class BinocularVisionActivity extends Activity implements View.OnClickLis
             this.finish();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    //第一种获取文件内容方式
+    public byte[] getContent(String filePath) throws IOException {
+        File file = new File(filePath);
+
+        long fileSize = file.length();
+        if (fileSize > Integer.MAX_VALUE) {
+            System.out.println("file too big...");
+            return null;
+        }
+
+        FileInputStream fi = new FileInputStream(file);
+
+        byte[] buffer = new byte[(int) fileSize];
+
+        int offset = 0;
+
+        int numRead = 0;
+
+        while (offset < buffer.length
+
+                && (numRead = fi.read(buffer, offset, buffer.length - offset)) >= 0) {
+
+            offset += numRead;
+
+        }
+
+        // 确保所有数据均被读取
+
+        if (offset != buffer.length) {
+
+            throw new IOException("Could not completely read file "
+                    + file.getName());
+
+        }
+
+        fi.close();
+
+        return buffer;
+    }
+
+    //第二种获取文件内容方式
+    public byte[] getContent2(String filePath) throws IOException
+    {
+        FileInputStream in=new FileInputStream(filePath);
+
+        ByteArrayOutputStream out=new ByteArrayOutputStream(1024);
+
+        System.out.println("bytes available:"+in.available());
+
+        byte[] temp=new byte[1024];
+
+        int size=0;
+
+        while((size=in.read(temp))!=-1)
+        {
+            out.write(temp,0,size);
+        }
+
+        in.close();
+
+        byte[] bytes=out.toByteArray();
+        System.out.println("bytes size got is:"+bytes.length);
+
+        return bytes;
+    }
+    //将byte数组写入文件
+    public void createFile(String path, byte[] content) throws IOException {
+
+        FileOutputStream fos = new FileOutputStream(path);
+
+        fos.write(content);
+        fos.close();
     }
 }

@@ -1233,7 +1233,7 @@ public class CameraCallback implements SurfaceHolder.Callback {
      * 时间
      */
     public String getDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS");
         long time = System.currentTimeMillis();
         Date curDate = new Date(time);//获取当前时间
         String datetime = formatter.format(curDate);

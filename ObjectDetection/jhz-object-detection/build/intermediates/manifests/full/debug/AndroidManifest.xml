@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.efrobot.capturing"
     android:versionCode="1"
-    android:versionName="1.0.2017072017" >
+    android:versionName="1.0.2017080918" >
 
     <uses-sdk
         android:minSdkVersion="16"

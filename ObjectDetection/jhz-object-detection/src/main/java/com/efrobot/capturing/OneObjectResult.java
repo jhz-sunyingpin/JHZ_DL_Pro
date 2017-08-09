@@ -15,12 +15,15 @@ public class OneObjectResult {
      * y_max : 200
      */
 
-    private String class_name;
-    private double probability;
-    private int x_min;
-    private int y_min;
-    private int x_max;
-    private int y_max;
+    private String class_name;//类名
+    private double probability;//置信概率
+    private int x_min;//矩形框左上角x坐标
+    private int y_min;//矩形框左上角y坐标
+    private int x_max;//矩形框右下角x坐标
+    private int y_max;//矩形框右下角y坐标
+    private float worldCor_x = 0;//世界坐标
+    private float worldCor_y = 0;
+    private float worldCor_z = 0;
 
     public OneObjectResult(String class_name, double probability, int x_min, int y_min, int x_max, int y_max) {
         this.class_name = class_name;
@@ -78,4 +81,16 @@ public class OneObjectResult {
     public void setY_max(int y_max) {
         this.y_max = y_max;
     }
+
+    public float getWorldCor_x() { return worldCor_x; }
+
+    public void setWorldCor_x(float worldCor_x) { this.worldCor_x = worldCor_x; }
+
+    public float getWorldCor_y() { return worldCor_y; }
+
+    public void setWorldCor_y(float worldCor_y) { this.worldCor_y = worldCor_y; }
+
+    public float getWorldCor_z() { return worldCor_z; }
+
+    public void setWorldCor_z(float worldCor_z) { this.worldCor_z = worldCor_z; }
 }
