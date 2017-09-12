@@ -6,6 +6,7 @@ public class StereoVision {
 		System.loadLibrary("ffmpegutils");
 		System.loadLibrary("visionCameraCalibration");
 		System.loadLibrary("visionObjectLocation");
+		System.loadLibrary("visionEncryption");
 //		System.loadLibrary("visionCalcCalibrationPos1");
 //		System.loadLibrary("visionCalcCalibrationPos");
 //		System.loadLibrary("visionDetectDistance");
@@ -283,4 +284,48 @@ public class StereoVision {
 	/************************************************************************/
 	public native float[] ObjectLocation(byte[] jbtImgDataL,byte[] jbtImgDataR,int dwidth,int dheight,float[] jfGlobalData,float[] jfObjectInfo,int nObjectSize,float[] jfCamPara,int picNum);
 
+	/************************************************************************/
+	/* 函数名：Encrypt(byte[] jbtImgData,const int dwidth,const int dheight,
+				string jstrPassPhrase,string jstrFilePath)
+	 * 文件名：visionOEncryption.so
+
+	 * 时  间：20170801
+	 * 作  者：薛林
+	 * 功  能：对图像进行加密
+	 * 输  入：
+	 *         pInput			rgb565图像数据
+	 *         dwidth			图像宽
+	 *         dheight			图像高
+	 *         strPassPhrase	密钥
+	 *         strFilePath		保存加密文件全路径
+
+	 * 输  出：无
+	 * 返回值：int
+	 *         -1 输入数据为空
+	 *		   0 压缩失败
+	 *		   1 压缩成功
+	/************************************************************************/
+	public native int Encrypt(byte[] jbtImgData, int dwidth, int dheight,String jstrPassPhrase,String jstrFilePath);
+
+	/************************************************************************/
+	/* 函数名：Decrypt(string jstrFilePathIn,const int dwidth,const int dheight,
+				string jstrPassPhrase, string jstrFilePathOut)
+	 * 文件名：visionOEncryption.so
+
+	 * 时  间：20170817
+	 * 作  者：薛林
+	 * 功  能：对加密文件进行解密
+	 * 输  入：
+	 *         jstrFilePathIn	加密文件全路径
+	 *         dwidth			图像宽
+	 *         dheight			图像高
+	 *         strPassPhrase	密钥
+	 *         jstrFilePathOut	保存解密文件全路径
+
+	 * 输  出：无
+	 * 返回值：int
+	 *		   0 解压缩失败
+	 *		   1 解压缩成功
+	/************************************************************************/
+	public native int Decrypt(String jstrFilePathIn, int dwidth, int dheight, String jstrPassPhrase, String jstrFilePathOut);
 }

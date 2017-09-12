@@ -70,5 +70,4 @@ public class BitmapUtils {
         return compressImage(bitmap);// 压缩好比例大小后再进行质量压缩
     }
 
-
 }
