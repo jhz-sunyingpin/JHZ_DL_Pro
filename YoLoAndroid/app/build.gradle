@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        platformKey {
+            keyPassword 'jinhuazhe12345678'
+            storeFile file(getProjectDir().getParent() + '/key_store/platform.keystore')
+            storePassword 'jinhuazhe12345678'
+            keyAlias 'jhz'
+        }
+        userKey {
+            keyPassword 'jinhuazhe12345678'
+            storeFile file(getProjectDir().getParent() + '/key_store/efrobotKeyStore_release.jks')
+            storePassword 'jinhuazhe12345678'
+            keyAlias '北京进化者机器人科技有限公司'
+        }
+        release {
+            keyAlias 'YoLoAndroid'
+            keyPassword 'YoLoAndroid'
+            storeFile file('C:/Users/LJ000PC/.android/YoLoAndroid001.jks')
+            storePassword 'YoLoAndroid001'
+        }
+    }
+    compileSdkVersion 25
+    defaultConfig {
+        applicationId "com.example.qh000.yoloandroid"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi-v7a' //,'x86', 'x86_64', 'armeabi', 'arm64-v8a'
+            stl "gnustl_static"
+        }
+        externalNativeBuild {
+            cmake {
+                cFlags "-std=c99 -fopenmp  -DOMP_NUM_THREADS=4"
+                arguments "-DANDROID_TOOLCHAIN=gcc"
+                cppFlags "-std=c++11 -frtti -fexceptions -fopenmp"
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+    productFlavors {
+    }
+    buildToolsVersion "25.0.3"
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.efrobot.library.net:mvpnetlibrary:0.0.31'
+    compile 'com.efrobot.library:framework:1.0.33'
+    testCompile 'junit:junit:4.12'
+}
